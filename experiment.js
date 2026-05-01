@@ -292,7 +292,7 @@ const save_data = {
   // filename: filename,
   data_string: () => jsPsych.data.get().csv(),
   filename: "test.csv",
-  data: "a,b,c\n1,2,3",
+  // data: "a,b,c\n1,2,3",
 };
 
 const endScreen = {
