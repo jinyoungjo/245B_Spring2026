@@ -5,11 +5,8 @@
 const jsPsych = initJsPsych({
   on_finish: function () {
     jsPsych.data.displayData("csv");
-  }
+  },
 });
-
-const subject_id = jsPsych.randomization.randomID(10);
-const filename = `${subject_id}.csv`;
 
 // --- Latin square assignment ---
 // Randomly assign participant to one of 3 lists
@@ -19,7 +16,7 @@ const listNumber = Math.floor(Math.random() * 3);
 const conditionNames = [
   "upper_bound_some",
   "upper_bound_only_some",
-  "lower_bound_some"
+  "lower_bound_some",
 ];
 
 function getConditionForItem(itemIndex, list) {
@@ -27,7 +24,13 @@ function getConditionForItem(itemIndex, list) {
 }
 
 // --- Build self-paced reading trials for a single text ---
-function buildReadingTrials(item, conditionData, itemId, condition, isCritical) {
+function buildReadingTrials(
+  item,
+  conditionData,
+  itemId,
+  condition,
+  isCritical
+) {
   const trials = [];
   const segments = conditionData.segments || conditionData;
   const triggerIdx = conditionData.trigger_index;
@@ -46,8 +49,8 @@ function buildReadingTrials(item, conditionData, itemId, condition, isCritical) 
         trial_duration: 1000,
         data: {
           task: "sentence_break",
-          item_id: itemId
-        }
+          item_id: itemId,
+        },
       });
       continue;
     }
@@ -71,8 +74,8 @@ function buildReadingTrials(item, conditionData, itemId, condition, isCritical) 
         segment_index: i,
         segment_role: segmentRole,
         is_critical: isCritical,
-        list: listNumber
-      }
+        list: listNumber,
+      },
     });
   }
 
@@ -96,15 +99,15 @@ function buildQuestionTrial(question, itemId) {
         task: "comprehension",
         item_id: itemId,
         correct_answer: question.correct,
-        question_text: question.text
+        question_text: question.text,
       },
       on_finish: function (data) {
         const response = data.response;
         const isYes = response === "f";
         data.participant_answer = isYes ? "yes" : "no";
         data.correct = data.participant_answer === data.correct_answer;
-      }
-    }
+      },
+    },
   ];
 }
 
@@ -119,7 +122,7 @@ const welcomeScreen = {
       <p>Press <strong>Space</strong> to continue.</p>
     </div>
   `,
-  choices: [" "]
+  choices: [" "],
 };
 
 const instructionsScreen = {
@@ -140,7 +143,7 @@ const instructionsScreen = {
       <p>Press <strong>Space</strong> to start the practice.</p>
     </div>
   `,
-  choices: [" "]
+  choices: [" "],
 };
 
 // --- Build practice block ---
@@ -169,7 +172,7 @@ const endPractice = {
       <p>Press <strong>Space</strong> to start the experiment.</p>
     </div>
   `,
-  choices: [" "]
+  choices: [" "],
 };
 
 // --- Build experimental block ---
@@ -187,7 +190,7 @@ for (let i = 0; i < criticalItems.length; i++) {
     isCritical: true,
     conditionData: conditionData,
     question: item.question,
-    segments: conditionData.segments
+    segments: conditionData.segments,
   });
 }
 
@@ -199,7 +202,7 @@ for (const item of fillerItems) {
     isCritical: false,
     conditionData: { segments: item.segments },
     question: item.question,
-    segments: item.segments
+    segments: item.segments,
   });
 }
 
@@ -249,7 +252,7 @@ const restBreak = {
       <p>When you are ready to continue, press <strong>Space</strong>.</p>
     </div>
   `,
-  choices: [" "]
+  choices: [" "],
 };
 
 const secondBlock = buildTrialBlock(secondHalf);
@@ -258,7 +261,9 @@ const secondBlock = buildTrialBlock(secondHalf);
 const debrief = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: function () {
-    const comprehensionTrials = jsPsych.data.get().filter({ task: "comprehension" });
+    const comprehensionTrials = jsPsych.data
+      .get()
+      .filter({ task: "comprehension" });
     const total = comprehensionTrials.count();
     const correct = comprehensionTrials.filter({ correct: true }).count();
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -271,15 +276,29 @@ const debrief = {
       </div>
     `;
   },
-  choices: [" "]
+  choices: [" "],
 };
+
+// --- Data saving ---
+// doesnt WORKKKKAKGUHIGUHS
+
+const subject_id = jsPsych.randomization.randomID(10);
+const filename = `${subject_id}.csv`;
 
 const save_data = {
   type: jsPsychPipe,
   action: "save",
-  experiment_id: "DyZ0GPmabtn5",
-  filename: filename,
-  data_string: ()=>jsPsych.data.get().csv()
+  experiment_id: "9JeF3mkj4UuR",
+  // filename: filename,
+  // data_string: () => jsPsych.data.get().csv(),
+  filename: "test.csv",
+  data: "a,b,c\n1,2,3",
+};
+
+const endScreen = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: "<p>Data saved. Press space to finish.</p>",
+  choices: [" "],
 };
 
 // --- Run experiment ---
@@ -288,11 +307,12 @@ const timeline = [
   instructionsScreen,
   ...practiceTimeline,
   endPractice,
-  ...firstBlock,
-  restBreak,
-  ...secondBlock,
-  debrief,
-  save_data
+  // ...firstBlock,
+  // restBreak,
+  // ...secondBlock,
+  // debrief,
+  save_data,
+  endScreen,
 ];
 
 jsPsych.run(timeline);
